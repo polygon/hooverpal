@@ -1,5 +1,9 @@
 # hooverpal
 
+EvE online tool to assist with Ninja Salvaging
+
+And a chance for me to learn some Vue.JS components
+
 ## Project setup
 ```
 npm install
