@@ -7,7 +7,7 @@
                 <b v-if="sig.is_bookmarked">YES</b>
                 <button class="btn btn-primary" v-else v-on:click="sig.is_bookmarked = true">Bookmark</button>
             </div>
-            <div class="col-lg-2">{{ gone_since }}</div>
+            <div class="col-lg-2">{{ goneSince }}</div>
             <div class="col-lg-2">
                 <button class="btn btn-danger" v-on:click="sig.is_removed = true">Remove</button>
             </div>
@@ -21,9 +21,9 @@ import { Signature } from '../signature';
 
 @Component
 export default class SignatureRow extends Vue {
-    @Prop() sig!: Signature;
-    gone_since: string = '';
-    intervall: any = null;
+    @Prop() private sig!: Signature;
+    private goneSince: string = '';
+    private intervall: any = null;
 
     get style(): object {
         if (this.sig.is_gone) {
@@ -32,7 +32,7 @@ export default class SignatureRow extends Vue {
         if (!this.sig.is_bookmarked) {
             return {'need-bm': true};
         }
-        return {'active': true};
+        return {active: true};
     }
 
     private calc_gone_since(): string {
@@ -60,7 +60,7 @@ export default class SignatureRow extends Vue {
 
     private beforeMount() {
         this.intervall = setInterval(() => {
-                this.gone_since = this.calc_gone_since() 
+                this.goneSince = this.calc_gone_since();
             }, 1000);
     }
 

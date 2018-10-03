@@ -2,7 +2,8 @@
     <div class="mt-3">
         <div class="form-group">
             <label for="pasteBox">Paste signature list here</label>
-            <textarea class="form-control" id="pasteBox" rows="8" v-model="paste"></textarea>
+            <textarea class="form-control" id="pasteBox"
+                      rows="8" v-model="paste" v-on:paste.stop="pasted"></textarea>
         </div>
         <button class="btn btn-primary" v-on:click="analyze()">Analyze</button>
     </div>
@@ -24,7 +25,14 @@ export default class SignatureEntry extends Vue {
 
     private analyze() {
         const sigs = parse_sigs(this.paste);
-        this.emit_new_sigs(sigs);
+        if (sigs.length > 0) {
+            this.emit_new_sigs(sigs);
+            window.scrollTo(0, 0);
+        }
+    }
+
+    private pasted(e: ClipboardEvent) {
+        this.$nextTick(this.analyze);
     }
 
     @Emit('newSigs')

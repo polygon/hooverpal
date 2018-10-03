@@ -1,6 +1,6 @@
 {
   "name": "hooverpal",
-  "version": "0.1.0",
+  "version": "1.1.0",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "jquery": "^3.3.1",
+    "localforage": "^1.7.2",
     "popper.js": "^1.14.4",
     "vue": "^2.5.17",
     "vue-class-component": "^6.0.0",

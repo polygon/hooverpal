@@ -2,6 +2,15 @@
   <div id="app" class="container">
     <h1>Hooverpal</h1>
     <p>Ninja Salvaging Extraordinaire</p>
+    <div v-if='storageHint.show' class="mb-2 mt-2 alert alert-primary" role="alert">
+      <span v-if='!storageHint.old'>
+        Your previous entries were restored, click "Clear all" below to start over
+      </span>
+      <span v-else>
+        Found {{ storageHint.age }} minutes old signatures
+        <button class="ml-2 btn btn-primary" v-on:click="load_sigs()">Load</button>
+      </span>
+    </div>
     <div class="mb-2 mt-2">
       <button class="btn btn-primary mr-2" v-on:click="mark_all()">Bookmark All</button>
       <button class="btn btn-danger" v-on:click="sigs=[]">Clear all</button>
@@ -12,10 +21,12 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Vue, Watch } from 'vue-property-decorator';
 import SignatureList from './components/SignatureList.vue';
 import SignatureEntry from './components/SignatureEntry.vue';
 import { Signature, same_sig } from './signature';
+import parse_sigs from './signature';
+import localforage from 'localforage';
 
 @Component({
   components: {
@@ -25,6 +36,12 @@ import { Signature, same_sig } from './signature';
 })
 export default class App extends Vue {
   private sigs: Signature[] = [];
+  private storageHint = {
+    show: false,
+    old: false,
+    age: 0,
+  };
+  private localforage = localforage;
 
   private new_sigs(newsigs: Signature[]) {
     const gone = [];
@@ -99,6 +116,72 @@ export default class App extends Vue {
     // Bookmark all signatures at once
     for (const sig of this.sigs) {
       sig.is_bookmarked = true;
+    }
+  }
+
+  private save_sigs(): Promise<void> {
+    // Saves the signatures to local storage
+    const now = new Date();
+    return localforage.setItem('sigs_time', now)
+      .then(() => {
+        localforage.setItem('sigs', this.sigs);
+      });
+  }
+
+  private load_sigs(): Promise<void> {
+    // Load signatures from local storage
+    return localforage.getItem('sigs')
+      .then((sigs) => {
+        if (sigs != null) {
+          this.sigs = sigs as Signature[];
+        }
+      });
+  }
+
+  @Watch('sigs', {deep: true})
+  private on_sigs_updated() {
+    this.save_sigs();
+    this.storageHint.show = false;
+  }
+
+  private beforeMount() {
+    localforage.config({
+      name: 'hooverpal',
+      storeName: 'hooverpal',
+    });
+    this.check_localstorage();
+    document.getElementsByTagName('html')[0].addEventListener('paste', this.on_paste);
+  }
+
+  private check_localstorage(): Promise<void> {
+    // Checks localstorage for existing signatures and decides on what to do
+    // based on age of the entries. Autoload when newer than 15 minutes, ask
+    // the user when newer than 2 hours and discard otherwise.
+    return localforage.getItem('sigs_time')
+      .then((time) => {
+        if (time != null) {
+          const diff = Number(new Date()) - Number(time);
+          this.storageHint.age = Math.round(diff / 60000);
+          if (diff < 900000) {
+            this.load_sigs()
+              .then(() => {
+                this.storageHint.show = true;
+                this.storageHint.old = false;
+              });
+          } else if (diff < 7200000) {
+            this.storageHint.show = true;
+            this.storageHint.old = true;
+          }
+        }
+      });
+  }
+
+  private on_paste(e: ClipboardEvent) {
+    // Global paste handler
+    const sigs = parse_sigs(e.clipboardData.getData('text'));
+    if (sigs.length > 0) {
+      this.new_sigs(sigs);
+      window.scrollTo(0, 0);
     }
   }
 }

@@ -20,14 +20,14 @@ import { Signature } from '../signature';
 
 @Component({
   components: {
-    SignatureRow
+    SignatureRow,
   },
 })
 export default class SignatureList extends Vue {
-    @Prop() sigs!: Signature[];
+    @Prop() private sigs!: Signature[];
 
     get gone_sigs(): Signature[] {
-        let gs = this.sigs.filter((sig) => {
+        const gs = this.sigs.filter((sig) => {
             if (sig.is_removed) { return false; }
             return sig.is_gone;
         });
@@ -35,7 +35,7 @@ export default class SignatureList extends Vue {
     }
 
     get active_sigs(): Signature[] {
-        let as = this.sigs.filter((sig) => {
+        const as = this.sigs.filter((sig) => {
             if (sig.is_removed) { return false; }
             return (!sig.is_gone) && (sig.is_bookmarked);
         });
@@ -43,8 +43,10 @@ export default class SignatureList extends Vue {
     }
 
     get needbm_sigs(): Signature[] {
-        let nb = this.sigs.filter((sig) => {
-            if (sig.is_removed) { return false; }
+        const nb = this.sigs.filter((sig) => {
+            if (sig.is_removed) {
+                return false;
+            }
             return (!sig.is_bookmarked);
         });
         return this.sort_sigs(nb);
@@ -52,10 +54,13 @@ export default class SignatureList extends Vue {
 
     private sort_sigs(sigs: Signature[]): Signature[] {
         return sigs.sort((a, b) => {
-            if (a.id < b.id) { return -1; }
-            else if (a.id > b.id) { return 1; }
+            if (a.id < b.id) {
+                return -1;
+            } else if (a.id > b.id) {
+                return 1;
+            }
             return 0;
-        })
+        });
     }
 }
 </script>
