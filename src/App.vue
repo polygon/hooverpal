@@ -1,7 +1,9 @@
 <template>
   <div id="app" class="container">
-    <h1>Hooverpal</h1>
-    <p>Ninja Salvaging Extraordinaire</p>
+    <div>
+      <span class="h1">Hooverpal</span>
+      <span class="h5 ml-3" style="color: gray;">Ninja Salvaging Extraordinaire</span>
+    </div>
     <div v-if='storageHint.show' class="mb-2 mt-2 alert alert-primary" role="alert">
       <span v-if='!storageHint.old'>
         Your previous entries were restored, click "Clear all" below to start over
